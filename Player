@@ -1,0 +1,117 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+   
+
+public class MutantControler : MonoBehaviour
+{
+
+    public float LookRadius = 60f;
+    public float followSpeed = 0.05f;
+    float Health=40.0f;
+
+    public GameObject target;
+    public GameObject mutant;
+    NavMeshAgent agent;
+   
+    Animator animator;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        target = GameObject.FindGameObjectWithTag("King");
+        mutant = GameObject.FindGameObjectWithTag("Mutant");
+        agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float Distance = Vector3.Distance(target.transform.position, transform.position);
+
+
+        if (Distance <= 4.7f)
+        {
+            animator.SetBool("iswalking", false);
+
+            animator.SetBool("Attack", true);
+           
+        }
+        
+        if (Distance > 5f && Distance<=30f)
+        {
+            animator.SetBool("Attack", false);
+            Vector3 targrtPos = new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z);
+            transform.position = Vector3.Lerp(transform.position, targrtPos, followSpeed);
+            Facetarget();
+        }
+
+
+        
+
+        if (Distance <= LookRadius)
+        {
+            animator.SetBool("roar", true);
+        }
+
+        if (Distance < 35f && Distance > 3.7f)
+        {
+            animator.SetBool("roar", true);
+
+            Vector3 targrtPos = new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z);
+            transform.position = Vector3.Lerp(transform.position, targrtPos, followSpeed);
+            Facetarget();
+            if (Health <= 0)
+            {
+                animator.SetBool("Dying", true);
+                Destroy(this);
+                //Object.Destroy(mutant.gameObject);
+
+            }
+
+        }
+        
+
+
+
+    }
+
+    void Facetarget()
+    {
+        
+        animator.SetBool("iswalking", true);
+        Vector3 direction = target.transform.position -transform.position  ;
+        Quaternion rotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 5f);
+
+
+    }
+    void OnDrawGizmosSelected()
+    {
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, LookRadius);
+    }
+
+    public void Reducehealth(float damage)
+    {
+
+        Debug.Log("hit");
+
+
+
+        //slider.value -= damage;
+        Health -= damage;
+        
+
+
+
+    }
