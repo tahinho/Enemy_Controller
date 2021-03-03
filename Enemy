@@ -1,0 +1,83 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+   
+
+public class MutantControler : MonoBehaviour
+{
+
+    public float LookRadius = 60f;
+    public float followSpeed = 0.03f;
+    float Health=40.0f;
+
+    public GameObject target;
+    NavMeshAgent agent;
+   
+    Animator animator;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        target = GameObject.FindGameObjectWithTag("King");
+        agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float Distance = Vector3.Distance(transform.position, target.transform.position);
+
+       
+        if (Distance < 35f && Distance > 7f)
+        {
+            animator.SetBool("Attack", false);
+            Facetarget();
+
+            animator.SetBool("iswalking", true);
+
+            Vector3 targrtPos = new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z);
+            transform.position = Vector3.Lerp(transform.position, targrtPos, followSpeed);
+       
+        }
+         if (Distance <= 7f)
+        {
+            animator.SetBool("iswalking", false);
+            animator.SetBool("Attack", true);
+        }
+         if (Health <= 1)
+        {
+            animator.SetBool("Attack", false);
+            animator.SetBool("Dying", true);
+            Destroy(this);
+          
+         }
+
+        
+    }
+
+    void Facetarget()
+    {
+            Vector3 direction = target.transform.position - transform.position;
+            Quaternion rotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 5f);
+    }
+    void OnDrawGizmosSelected()
+    {
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, LookRadius);
+    }
+    public void Reducehealth(float damage)
+    {
+        Debug.Log("hit");
+       
+        Health -= damage;
+        Debug.Log(Health);
+    }
+}
